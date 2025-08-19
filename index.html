@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+        Zengin Metin Editörü (TinyMCE) için script 
+        ÖNEMLİ: "YOUR_TINYMCE_API_KEY" yazan yeri tiny.cloud sitesinden alacağınız ücretsiz API anahtarınız ile değiştirin.
+    -->
+    <script src="https://cdn.tiny.cloud/1/iz1q9ke2aue532pa7d84kvv7g9oaargyexfzf2nu0ssr8wcv/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -17,6 +22,17 @@
         }
         .view.active {
             display: block;
+        }
+        /* Tailwind Prose'un editör içeriğini de şekillendirmesi için */
+        .prose img {
+            border-radius: 0.5rem;
+        }
+        .prose a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        .prose a:hover {
+            color: #1d4ed8;
         }
     </style>
 </head>
@@ -74,7 +90,7 @@
                  <div class="bg-white p-8 rounded-lg shadow-sm">
                     <h1 class="text-3xl font-bold mb-4 text-gray-900">Hakkımda</h1>
                     <div class="prose max-w-none lg:prose-xl">
-                        <p>Merhaba! Ben [Adınız]. Bu blogda teknoloji, seyahat ve kişisel gelişim üzerine düşüncelerimi ve deneyimlerimi paylaşıyorum.</p>
+                        <p>Merhaba! Ben MAHMUT DOĞAN. Bu blogda teknoloji, seyahat ve kişisel gelişim üzerine düşüncelerimi ve deneyimlerimi paylaşıyorum.</p>
                         <p>Yıllardır edindiğim bilgileri ve tecrübeleri, başkalarına da ilham vermesi umuduyla burada bir araya getiriyorum. Umarım okurken keyif alırsınız ve yeni bakış açıları kazanırsınız.</p>
                         <p>Bana sosyal medya hesaplarımdan veya e-posta yoluyla ulaşabilirsiniz.</p>
                     </div>
@@ -105,7 +121,8 @@
                         <div class="space-y-4">
                             <input type="text" id="post-title" placeholder="Yazı Başlığı" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
                             <input type="text" id="post-category" placeholder="Kategori (Örn: Teknoloji)" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
-                            <textarea id="post-body" placeholder="Yazı içeriği..." rows="10" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required></textarea>
+                            <!-- Basit textarea, zengin metin editörü ile değiştirildi -->
+                            <textarea id="post-body"></textarea>
                             <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-all font-semibold">Yayınla</button>
                         </div>
                     </form>
@@ -145,7 +162,7 @@
             getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // ÖNEMLİ: Bu bilgileri kendi Firebase projenizden almalısınız.
+        // Firebase Yapılandırması
         const firebaseConfig = {
             apiKey: "AIzaSyAaqkuAxFB_sZ-72IcUZUYIYm7XiFbqlKI",
             authDomain: "alihan-1042.firebaseapp.com",
@@ -160,6 +177,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        let isEditorInitialized = false;
+
+        // Zengin Metin Editörünü Başlatma
+        function initializeEditor() {
+            if (isEditorInitialized || !document.getElementById('post-body')) return;
+            tinymce.init({
+                selector: 'textarea#post-body',
+                plugins: 'link image code lists autoresize',
+                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
+                menubar: false,
+                height: 400,
+                placeholder: 'Yazı içeriği...'
+            });
+            isEditorInitialized = true;
+        }
+
+        // Zengin Metin Editörünü Kaldırma
+        function destroyEditor() {
+            const editor = tinymce.get('post-body');
+            if (editor) {
+                editor.remove();
+            }
+            isEditorInitialized = false;
+        }
 
         // DOM Elementleri
         const views = document.querySelectorAll('.view');
@@ -208,7 +250,6 @@
                     if(post.category) allCategories.add(post.category);
                 });
 
-                // Yazıları tarihe göre en yeniden eskiye sırala
                 allPosts.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
                 renderCategories();
@@ -232,11 +273,10 @@
                         <p class="text-sm text-blue-600 font-semibold">${post.category}</p>
                         <h1 class="text-4xl font-bold mt-2 mb-4">${post.title}</h1>
                         <p class="text-gray-500 mb-8">Yayınlanma Tarihi: ${postDate}</p>
-                        <div>${post.body.replace(/\n/g, '<br>')}</div>
+                        <div>${post.body}</div>
                     `;
                     loadComments(postId);
 
-                    // Yorum formuna postId'yi ekle
                     document.getElementById('comment-form').dataset.postId = postId;
                 } else {
                     postContent.innerHTML = `<h1>Yazı bulunamadı.</h1>`;
@@ -257,7 +297,6 @@
                 }
                 const comments = [];
                 snapshot.forEach(doc => comments.push(doc.data()));
-                // Yorumları tarihe göre en yeniden eskiye sırala
                 comments.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
                 
                 comments.forEach(comment => {
@@ -292,7 +331,12 @@
                 const postEl = document.createElement('div');
                 postEl.className = 'bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300';
                 const postDate = post.createdAt.toDate().toLocaleDateString('tr-TR');
-                const snippet = post.body.substring(0, 200) + '...';
+                
+                // HTML içeriğinden metin kısmını alıp özet oluşturma
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = post.body;
+                const textContent = tempDiv.textContent || tempDiv.innerText || "";
+                const snippet = textContent.substring(0, 200) + '...';
 
                 postEl.innerHTML = `
                     <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">${post.category}</span>
@@ -312,14 +356,12 @@
                 button.textContent = category;
                 button.className = 'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
                 button.onclick = () => {
-                    // Aktif butonu güncelle
                     document.querySelectorAll('#category-filters button').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
                     button.classList.add('bg-blue-600', 'text-white');
                     loadPosts(category);
                 };
                 categoryFiltersContainer.appendChild(button);
             });
-            // İlk butonu (Tümü) aktif yap
             if(categoryFiltersContainer.firstChild) {
                 categoryFiltersContainer.firstChild.classList.add('bg-blue-600', 'text-white');
             }
@@ -330,7 +372,13 @@
             e.preventDefault();
             const title = document.getElementById('post-title').value;
             const category = document.getElementById('post-category').value;
-            const body = document.getElementById('post-body').value;
+            // İçeriği TinyMCE editöründen al
+            const body = tinymce.get('post-body').getContent();
+
+            if (!title || !category || !body) {
+                alert('Lütfen tüm alanları doldurun.');
+                return;
+            }
 
             try {
                 await addDoc(collection(db, "posts"), {
@@ -341,6 +389,7 @@
                 });
                 alert('Yazı başarıyla yayınlandı!');
                 e.target.reset();
+                tinymce.get('post-body').setContent(''); // Editörü temizle
                 window.location.hash = '#/';
             } catch (error) {
                 console.error("Yazı eklenirken hata: ", error);
@@ -393,15 +442,15 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Kullanıcı giriş yapmış
                 loginFormContainer.classList.add('hidden');
                 createPostContainer.classList.remove('hidden');
                 adminLink.classList.remove('hidden');
+                initializeEditor(); // Kullanıcı giriş yapınca editörü başlat
             } else {
-                // Kullanıcı çıkış yapmış
                 loginFormContainer.classList.remove('hidden');
                 createPostContainer.classList.add('hidden');
                 adminLink.classList.add('hidden');
+                destroyEditor(); // Kullanıcı çıkış yapınca editörü kaldır
             }
         });
 
