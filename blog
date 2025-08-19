@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header ve Navigasyon -->
+        <header class="py-6 border-b border-gray-200">
+            <nav class="flex justify-between items-center">
+                <a href="#/" id="logo" class="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors">MAHMUT DOĞAN</a>
+                <div class="space-x-4">
+                    <a href="#/" class="nav-link text-gray-600 hover:text-blue-600 transition-colors">Anasayfa</a>
+                    <a href="#/hakkimda" class="nav-link text-gray-600 hover:text-blue-600 transition-colors">Hakkımda</a>
+                    <a href="#/panel" id="admin-link" class="hidden text-gray-600 bg-gray-100 px-3 py-1 rounded-md hover:bg-gray-200 transition-colors">Yönetim Paneli</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="py-8">
+            <!-- Anasayfa Görünümü -->
+            <div id="home-view" class="view active">
+                <h1 class="text-3xl font-bold mb-6 text-gray-900">Son Yazılar</h1>
+                <div id="category-filters" class="mb-8 flex flex-wrap gap-2"></div>
+                <div id="posts-container" class="space-y-8">
+                    <!-- Blog yazıları buraya dinamik olarak eklenecek -->
+                </div>
+            </div>
+
+            <!-- Tekil Yazı Görünümü -->
+            <div id="post-view" class="view">
+                <div id="post-content" class="prose max-w-none lg:prose-xl">
+                    <!-- Tekil blog yazısı içeriği buraya gelecek -->
+                </div>
+                <hr class="my-12">
+                <!-- Yorumlar Bölümü -->
+                <div id="comments-section">
+                    <h2 class="text-2xl font-bold mb-6">Yorumlar</h2>
+                    <div id="comments-list" class="space-y-6 mb-8">
+                        <!-- Yorumlar buraya eklenecek -->
+                    </div>
+                    <form id="comment-form" class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-xl font-semibold mb-4">Yorum Bırakın</h3>
+                        <div class="space-y-4">
+                            <input type="text" id="comment-author" placeholder="Adınız" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <textarea id="comment-text" placeholder="Yorumunuz..." rows="4" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required></textarea>
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-all font-semibold">Gönder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Hakkımda Görünümü -->
+            <div id="about-view" class="view">
+                 <div class="bg-white p-8 rounded-lg shadow-sm">
+                    <h1 class="text-3xl font-bold mb-4 text-gray-900">Hakkımda</h1>
+                    <div class="prose max-w-none lg:prose-xl">
+                        <p>Merhaba! Ben [Adınız]. Bu blogda teknoloji, seyahat ve kişisel gelişim üzerine düşüncelerimi ve deneyimlerimi paylaşıyorum.</p>
+                        <p>Yıllardır edindiğim bilgileri ve tecrübeleri, başkalarına da ilham vermesi umuduyla burada bir araya getiriyorum. Umarım okurken keyif alırsınız ve yeni bakış açıları kazanırsınız.</p>
+                        <p>Bana sosyal medya hesaplarımdan veya e-posta yoluyla ulaşabilirsiniz.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yönetici Paneli Görünümü -->
+            <div id="admin-view" class="view">
+                <!-- Giriş Formu -->
+                <div id="login-form-container" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-center mb-6">Yönetici Girişi</h2>
+                    <form id="login-form">
+                        <div class="space-y-4">
+                            <input type="email" id="login-email" placeholder="E-posta" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <input type="password" id="login-password" placeholder="Şifre" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-all font-semibold">Giriş Yap</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Yeni Yazı Ekleme Formu (Giriş yapınca görünür) -->
+                <div id="create-post-container" class="hidden bg-white p-8 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Yeni Yazı Ekle</h2>
+                        <button id="logout-button" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all">Çıkış Yap</button>
+                    </div>
+                    <form id="create-post-form">
+                        <div class="space-y-4">
+                            <input type="text" id="post-title" placeholder="Yazı Başlığı" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <input type="text" id="post-category" placeholder="Kategori (Örn: Teknoloji)" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <textarea id="post-body" placeholder="Yazı içeriği..." rows="10" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required></textarea>
+                            <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-all font-semibold">Yayınla</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 py-8 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-center md:text-left">
+                    <p class="text-gray-600">&copy; 2024 MAHMUT DOĞAN. Tüm hakları saklıdır.</p>
+                    <a href="#/panel" class="text-sm text-gray-400 hover:text-blue-600">Yönetici</a>
+                </div>
+                <!-- E-posta Abonelik Formu -->
+                <div class="w-full md:w-auto">
+                    <h3 class="font-semibold mb-2 text-center md:text-left">Bültenimize Abone Olun</h3>
+                    <form id="subscribe-form" class="flex flex-col sm:flex-row gap-2">
+                        <input type="email" id="subscribe-email" placeholder="E-posta adresiniz" class="w-full sm:w-64 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit" class="bg-gray-800 text-white px-6 py-3 rounded-md hover:bg-gray-900 transition-all font-semibold">Abone Ol</button>
+                    </form>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Firebase ve Uygulama Mantığı -->
+    <script type="module">
+        // Firebase SDK'larını import et
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, getDocs, doc, getDoc, 
+            query, where, onSnapshot, serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // ÖNEMLİ: Bu bilgileri kendi Firebase projenizden almalısınız.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaqkuAxFB_sZ-72IcUZUYIYm7XiFbqlKI",
+            authDomain: "alihan-1042.firebaseapp.com",
+            projectId: "alihan-1042",
+            storageBucket: "alihan-1042.firebasestorage.app",
+            messagingSenderId: "701195693273",
+            appId: "1:701195693273:web:35052d62d16ebbf26ca2c8",
+            measurementId: "G-6NHQ06V301"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // DOM Elementleri
+        const views = document.querySelectorAll('.view');
+        const postsContainer = document.getElementById('posts-container');
+        const postContent = document.getElementById('post-content');
+        const commentsList = document.getElementById('comments-list');
+        const categoryFiltersContainer = document.getElementById('category-filters');
+
+        // --- YÖNLENDİRME (ROUTING) MANTIĞI ---
+        function router() {
+            const hash = window.location.hash || '#/';
+            let currentPostId = null;
+
+            views.forEach(view => view.classList.remove('active'));
+
+            if (hash.startsWith('#/post/')) {
+                currentPostId = hash.substring(7);
+                document.getElementById('post-view').classList.add('active');
+                loadPost(currentPostId);
+            } else if (hash === '#/hakkimda') {
+                document.getElementById('about-view').classList.add('active');
+            } else if (hash === '#/panel') {
+                document.getElementById('admin-view').classList.add('active');
+            } else {
+                document.getElementById('home-view').classList.add('active');
+                loadPosts();
+            }
+        }
+
+        // --- VERİ YÜKLEME MANTIĞI ---
+        let allPosts = [];
+        let allCategories = new Set();
+
+        async function loadPosts(filterCategory = null) {
+            try {
+                const postsRef = collection(db, "posts");
+                const querySnapshot = await getDocs(postsRef);
+                
+                allPosts = [];
+                allCategories.clear();
+                allCategories.add('Tümü');
+
+                querySnapshot.forEach((doc) => {
+                    const post = { id: doc.id, ...doc.data() };
+                    allPosts.push(post);
+                    if(post.category) allCategories.add(post.category);
+                });
+
+                // Yazıları tarihe göre en yeniden eskiye sırala
+                allPosts.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+                renderCategories();
+                renderPosts(filterCategory);
+
+            } catch (error) {
+                console.error("Yazılar yüklenirken hata oluştu: ", error);
+                postsContainer.innerHTML = `<p class="text-red-500">Yazılar yüklenemedi.</p>`;
+            }
+        }
+
+        async function loadPost(postId) {
+            try {
+                const postRef = doc(db, "posts", postId);
+                const postSnap = await getDoc(postRef);
+
+                if (postSnap.exists()) {
+                    const post = postSnap.data();
+                    const postDate = post.createdAt.toDate().toLocaleDateString('tr-TR');
+                    postContent.innerHTML = `
+                        <p class="text-sm text-blue-600 font-semibold">${post.category}</p>
+                        <h1 class="text-4xl font-bold mt-2 mb-4">${post.title}</h1>
+                        <p class="text-gray-500 mb-8">Yayınlanma Tarihi: ${postDate}</p>
+                        <div>${post.body.replace(/\n/g, '<br>')}</div>
+                    `;
+                    loadComments(postId);
+
+                    // Yorum formuna postId'yi ekle
+                    document.getElementById('comment-form').dataset.postId = postId;
+                } else {
+                    postContent.innerHTML = `<h1>Yazı bulunamadı.</h1>`;
+                }
+            } catch (error) {
+                console.error("Yazı yüklenirken hata: ", error);
+                postContent.innerHTML = `<h1>Bir hata oluştu.</h1>`;
+            }
+        }
+        
+        function loadComments(postId) {
+            const commentsRef = collection(db, "posts", postId, "comments");
+            onSnapshot(commentsRef, (snapshot) => {
+                commentsList.innerHTML = '';
+                if (snapshot.empty) {
+                    commentsList.innerHTML = '<p class="text-gray-500">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>';
+                    return;
+                }
+                const comments = [];
+                snapshot.forEach(doc => comments.push(doc.data()));
+                // Yorumları tarihe göre en yeniden eskiye sırala
+                comments.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+                
+                comments.forEach(comment => {
+                     const commentDate = comment.createdAt.toDate().toLocaleString('tr-TR');
+                     const commentEl = document.createElement('div');
+                     commentEl.className = 'bg-gray-100 p-4 rounded-lg';
+                     commentEl.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="font-bold text-gray-900">${comment.author}</p>
+                            <p class="text-xs text-gray-500">${commentDate}</p>
+                        </div>
+                        <p class="text-gray-700">${comment.text}</p>
+                     `;
+                     commentsList.appendChild(commentEl);
+                });
+            });
+        }
+
+        // --- RENDER (GÖRSELLEŞTİRME) FONKSİYONLARI ---
+        function renderPosts(filterCategory = null) {
+            postsContainer.innerHTML = '';
+            const postsToRender = filterCategory && filterCategory !== 'Tümü'
+                ? allPosts.filter(post => post.category === filterCategory)
+                : allPosts;
+
+            if (postsToRender.length === 0) {
+                postsContainer.innerHTML = '<p>Gösterilecek yazı bulunamadı.</p>';
+                return;
+            }
+
+            postsToRender.forEach(post => {
+                const postEl = document.createElement('div');
+                postEl.className = 'bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300';
+                const postDate = post.createdAt.toDate().toLocaleDateString('tr-TR');
+                const snippet = post.body.substring(0, 200) + '...';
+
+                postEl.innerHTML = `
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">${post.category}</span>
+                    <h2 class="text-2xl font-bold mb-2"><a href="#/post/${post.id}" class="text-gray-900 hover:text-blue-700">${post.title}</a></h2>
+                    <p class="text-sm text-gray-500 mb-4">${postDate}</p>
+                    <p class="text-gray-600 mb-4">${snippet}</p>
+                    <a href="#/post/${post.id}" class="font-semibold text-blue-600 hover:underline">Devamını Oku &rarr;</a>
+                `;
+                postsContainer.appendChild(postEl);
+            });
+        }
+
+        function renderCategories() {
+            categoryFiltersContainer.innerHTML = '';
+            allCategories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.className = 'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+                button.onclick = () => {
+                    // Aktif butonu güncelle
+                    document.querySelectorAll('#category-filters button').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+                    button.classList.add('bg-blue-600', 'text-white');
+                    loadPosts(category);
+                };
+                categoryFiltersContainer.appendChild(button);
+            });
+            // İlk butonu (Tümü) aktif yap
+            if(categoryFiltersContainer.firstChild) {
+                categoryFiltersContainer.firstChild.classList.add('bg-blue-600', 'text-white');
+            }
+        }
+
+        // --- FORM GÖNDERİM MANTIĞI ---
+        document.getElementById('create-post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            const body = document.getElementById('post-body').value;
+
+            try {
+                await addDoc(collection(db, "posts"), {
+                    title: title,
+                    category: category,
+                    body: body,
+                    createdAt: serverTimestamp()
+                });
+                alert('Yazı başarıyla yayınlandı!');
+                e.target.reset();
+                window.location.hash = '#/';
+            } catch (error) {
+                console.error("Yazı eklenirken hata: ", error);
+                alert('Yazı eklenirken bir hata oluştu.');
+            }
+        });
+
+        document.getElementById('comment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const postId = e.target.dataset.postId;
+            const author = document.getElementById('comment-author').value;
+            const text = document.getElementById('comment-text').value;
+
+            if (!postId) return;
+
+            try {
+                const commentsRef = collection(db, "posts", postId, "comments");
+                await addDoc(commentsRef, {
+                    author: author,
+                    text: text,
+                    createdAt: serverTimestamp()
+                });
+                e.target.reset();
+            } catch (error) {
+                console.error("Yorum eklenirken hata: ", error);
+                alert('Yorumunuz gönderilirken bir hata oluştu.');
+            }
+        });
+        
+        document.getElementById('subscribe-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('subscribe-email').value;
+            try {
+                await addDoc(collection(db, "subscribers"), {
+                    email: email,
+                    subscribedAt: serverTimestamp()
+                });
+                alert('Bültenimize başarıyla abone oldunuz!');
+                e.target.reset();
+            } catch (error) {
+                console.error("Abone olurken hata: ", error);
+                alert('Abonelik sırasında bir hata oluştu.');
+            }
+        });
+
+        // --- YÖNETİCİ GİRİŞ MANTIĞI ---
+        const loginFormContainer = document.getElementById('login-form-container');
+        const createPostContainer = document.getElementById('create-post-container');
+        const adminLink = document.getElementById('admin-link');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Kullanıcı giriş yapmış
+                loginFormContainer.classList.add('hidden');
+                createPostContainer.classList.remove('hidden');
+                adminLink.classList.remove('hidden');
+            } else {
+                // Kullanıcı çıkış yapmış
+                loginFormContainer.classList.remove('hidden');
+                createPostContainer.classList.add('hidden');
+                adminLink.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch((error) => {
+                    alert('Giriş başarısız: ' + error.message);
+                });
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // --- UYGULAMAYI BAŞLAT ---
+        window.addEventListener('hashchange', router);
+        window.addEventListener('load', router);
+
+    </script>
+</body>
+</html>
